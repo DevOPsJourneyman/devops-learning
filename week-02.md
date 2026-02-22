@@ -1,5 +1,12 @@
 # Notes for the week
 
+* Spent time going over Week 1. Successes.  Support system needs work to keep the roadmap on track. 
+* This week will be about continuing my Docker eduation.  I have the basics down.
+* I want to create a flash app which is a food tracker. 
+
+
+
+
 ## Docker install
 * Studied the basic definitions of Docker items.
 * Installed docker on zeus01 using terminal.  The VM has no head.
