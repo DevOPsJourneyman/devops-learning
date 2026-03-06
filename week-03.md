@@ -1,5 +1,15 @@
 # Week 3 — Kubernetes Fundamentals
 
+## Notes
+
+- The "aha moment" was deleting a pod and watching it come back. That's when orchestration made sense. I'm not managing containers, I'm declaring what should exist.
+- Troubleshooting atlas-status felt like real work. Pods running but app broken. Logs told the truth. That's the skill interviewers want.
+- ConfigMaps and Secrets are cleaner than hardcoding env vars in docker-compose. Config lives in the cluster, not baked into images.
+- Helm feels like cheating but I get why teams use it. One command vs writing 10 YAML files.
+- Namespaces clicked when the NodePort collision happened. Isolation isn't just organization, it's practical separation.
+- Week 2 Docker knowledge transferred directly. Containers are containers. Kubernetes just adds the "keep it running" layer.
+- Energy was low mid-week but hands-on work is easier than theory. Building beats watching.
+
 ## What I Built
 
 - 3-node k3s cluster: zeus01 (control plane), zeus02 + zeus03 (workers)
