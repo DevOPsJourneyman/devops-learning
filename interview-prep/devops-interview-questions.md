@@ -88,6 +88,61 @@ The logs tell the truth. Pods can show "Running" but the app inside might be mis
 
 ---
 
+---
+
+## Week 5–6 — CI/CD & GitHub Actions
+
+### Q: What is CI/CD and why does it matter?
+
+**A:** CI (Continuous Integration) means every code push is automatically built and tested. CD (Continuous Delivery/Deployment) means a verified build is automatically pushed to a registry or deployed. It matters because it removes manual steps from the release process — catching broken builds before they reach production and making deployments repeatable and auditable.
+
+---
+
+### Q: Describe a CI/CD pipeline you've built. What does each stage do?
+
+**A:** I built a three-job GitHub Actions pipeline for atlas-dojo:
+1. **Lint** — hadolint analyses the Dockerfile for bad practices before anything builds
+2. **Build & Test** — image is built, container is started, curl smoke tests the app is actually responding
+3. **Push** — only runs if build and test pass; authenticated push to Docker Hub
+
+Each job uses `needs:` to chain dependencies — push never runs if the smoke test fails.
+
+---
+
+### Q: How do you store secrets in a CI/CD pipeline?
+
+**A:** GitHub repository secrets — stored encrypted in GitHub, referenced in the workflow YAML as `${{ secrets.SECRET_NAME }}`. Never hardcoded in the workflow file. In my pipeline, Docker Hub credentials are stored as `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` and injected at the push stage only.
+
+---
+
+### Q: What's the difference between a job and a step in GitHub Actions?
+
+**A:** A step is a single command or action within a job. A job is a group of steps that run together on the same runner. Jobs run in parallel by default — use `needs:` to make them sequential. Steps within a job always run sequentially and share the same filesystem.
+
+---
+
+### Q: What is `actions/checkout` and why is it in every job?
+
+**A:** It clones the repository onto the runner so the job has access to the code. Each job gets a fresh runner with nothing on it — if you forget checkout, the job can't see your files. It needs to be in every job that touches the codebase.
+
+---
+
+### Q: What does `push: false` with `load: true` do in a Docker build action?
+
+**A:** Builds the image and loads it into the runner's local Docker daemon without pushing it to a registry. Used in the build-and-test job so the smoke test can run the container locally — you need the image available before you've verified it works.
+
+---
+
+### Q: Why use `curl --fail` in a smoke test?
+
+**A:** Without `--fail`, curl returns exit code 0 even on HTTP error responses (404, 500). `--fail` makes curl return a non-zero exit code on server errors, which causes the pipeline step to fail. Without it, a broken app would pass the smoke test as long as the server responds with anything.
+
+---
+
+
+
+
+
 ## Quick Reference — Commands That Impress
 
 ```bash
@@ -102,4 +157,30 @@ helm install <name> <chart> -n <ns>    # One-command deploy
 
 ---
 
-*Last updated: Week 3 — 6 March 2026*
+## Quick Reference — CI/CD Commands & Syntax
+```yaml
+# Job dependency chain
+jobs:
+  push:
+    needs: build-and-test   # Only runs if build-and-test passes
+
+# Reference a secret
+${{ secrets.DOCKERHUB_TOKEN }}
+
+# Build without pushing (for smoke test)
+uses: docker/build-push-action@v5
+with:
+  push: false
+  load: true
+  tags: myapp:test
+
+# Smoke test pattern
+run: docker run -d -p 5000:5000 --name test myapp:test
+run: sleep 3
+run: curl --fail http://localhost:5000
+run: docker stop test
+```
+
+---
+
+*Last updated: Week 6 — 23 March 2026*
